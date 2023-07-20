@@ -1,5 +1,5 @@
 from django.db import models
-from epicevents.users.models import UserClient, UserEmployee
+from apps.users.models import UserClient, UserEmployee
 
 
 class Contract(models.Model):

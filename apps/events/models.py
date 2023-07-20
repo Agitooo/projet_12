@@ -1,6 +1,6 @@
 from django.db import models
-from epicevents.contracts.models import Contract
-from epicevents.users.models import UserEmployee
+from apps.contracts.models import Contract
+from apps.users.models import UserEmployee
 
 
 class Event(models.Model):
