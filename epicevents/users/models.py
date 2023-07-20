@@ -2,7 +2,13 @@ from django.contrib.auth.models import User, AbstractUser
 from django.db import models
 
 
-class UserEmployee(models.Model):
+# class UserModel(models.Model):
+#
+#     class Meta:
+#         abstract = True
+
+
+class UserEmployee(User):
 
     EMPLOYEE_COMMERCIAL = 1
     EMPLOYEE_SUPPORT = 2
@@ -14,7 +20,7 @@ class UserEmployee(models.Model):
         (EMPLOYEE_GESTION, 'gestion')
     ]
 
-    employee = models.OneToOneField(User, on_delete=models.CASCADE)
+    # employee = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=10)
     department = models.PositiveSmallIntegerField(choices=EMPLOYEE_DEPARTMENT)
     date_create = models.DateTimeField(auto_now_add=True)
@@ -27,12 +33,11 @@ class UserEmployee(models.Model):
         verbose_name_plural = "employés"
 
     def __str__(self):
-        return self.employee.name
+        return self.phone
 
 
-class UserClient(models.Model):
+class UserClient(User):
 
-    client = models.OneToOneField(User, on_delete=models.CASCADE)
     phone = models.CharField(max_length=10)
     company = models.CharField(max_length=256)
     date_create = models.DateTimeField(auto_now_add=True)
@@ -46,4 +51,4 @@ class UserClient(models.Model):
         verbose_name_plural = "clients"
 
     def __str__(self):
-        return self.client.name
+        return self.phone

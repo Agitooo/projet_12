@@ -1,6 +1,6 @@
 from django.db import models
-from epicevents.contracts.models import Contract
-from epicevents.users.models import UserEmployee
+from contracts.models import Contract
+from users.models import UserEmployee
 
 
 class Event(models.Model):
@@ -14,9 +14,9 @@ class Event(models.Model):
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     actif = models.BooleanField(default=True)
+    created_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="created_events")
+    updated_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="updated_events")
     objects = models.Manager()
-    created_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="créateur event")
-    updated_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="modificateur event")
 
     class Meta:
         verbose_name = "event"

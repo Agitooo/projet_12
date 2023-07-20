@@ -1,5 +1,5 @@
 from django.db import models
-from epicevents.users.models import UserClient, UserEmployee
+from users.models import UserClient, UserEmployee
 
 
 class Contract(models.Model):
@@ -19,8 +19,8 @@ class Contract(models.Model):
     status = models.PositiveSmallIntegerField(choices=CONTRACT_STATUS)
     total_price = models.FloatField()
     remaining_price = models.FloatField()
-    created_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="créateur contrat")
-    updated_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="modificateur contrat")
+    created_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="created_contrats")
+    updated_by = models.ForeignKey(UserEmployee, on_delete=models.DO_NOTHING, related_name="updated_contrats")
 
     class Meta:
         verbose_name = "contract"
