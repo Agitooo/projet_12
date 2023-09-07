@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -37,9 +39,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users',
-    'contracts',
-    'events'
+    'apps.peoples',
+    'apps.contracts',
+    'apps.events',
+    'django_token'
 ]
 
 MIDDLEWARE = [
@@ -50,9 +53,15 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_token.middleware.TokenMiddleware',
 ]
 
-ROOT_URLCONF = 'settings.urls'
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'django_token.backends.TokenBackend'
+]
+
+ROOT_URLCONF = 'urls'
 
 TEMPLATES = [
     {
@@ -70,7 +79,8 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'settings.wsgi.application'
+# WSGI_APPLICATION = 'settings.wsgi.application'
+WSGI_APPLICATION = 'wsgi.application'
 
 
 # Database
@@ -102,6 +112,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# AUTH_USER_MODEL = 'auth.User'
+AUTH_USER_MODEL = 'peoples.UserEmployee'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
@@ -124,3 +136,23 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Durée de validité du token de connexion
+EMPLOYEE_LOGIN_DURATION_VALIDITY = 1800
+
+# Droits pour les permissions
+ADD = 'Can add '
+CHANGE = 'Can change '
+VIEW = 'Can view '
+
+sentry_sdk.init(
+    dsn="https://d59749f1552334014e40b855c2c1c962@o4505813250146304.ingest.sentry.io/4505813262860288",
+    # Set traces_sample_rate to 1.0 to capture 100%
+    # of transactions for performance monitoring.
+    # We recommend adjusting this value in production.
+    traces_sample_rate=1.0,
+    # Set profiles_sample_rate to 1.0 to profile 100%
+    # of sampled transactions.
+    # We recommend adjusting this value in production.
+    profiles_sample_rate=1.0,
+)

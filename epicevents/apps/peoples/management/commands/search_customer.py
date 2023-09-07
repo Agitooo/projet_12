@@ -1,0 +1,45 @@
+import djclick as click
+from django.core.management import BaseCommand
+from rich.console import Console
+from rich.table import Table
+
+from apps.peoples.models import Customer, UserEmployee
+from django_token.models import Token
+from settings.settings import VIEW
+
+console = Console()
+
+
+@click.command()
+@click.option('--firstname', '-fn', prompt=True, default='')
+@click.option('--lastname', '-ln', prompt=True, default='')
+def search_customer(firstname="", lastname=""):
+    """
+        Show all customer
+    """
+
+    user = UserEmployee()
+    token = user.token_is_valid()
+
+    if isinstance(token, Token):
+
+        is_allowed = user.has_permission(token.user, VIEW + Customer.PERMISSION_CUSTOMER_NAME)
+
+        if is_allowed:
+
+            table = Table(show_header=True)
+            table.add_column("ID Customer")
+            table.add_column("Firstname")
+            table.add_column("Lastname")
+            table.add_column("Email")
+            table.add_column("Phone")
+            table.add_column("Company")
+            customers = Customer.objects.filter(actif=True, firstname__contains=firstname, lastname__contains=lastname)
+            for customer in customers:
+                table.add_row(str(customer.pk), customer.firstname, customer.lastname,
+                              customer.email, customer.phone, customer.company)
+            console.print(table)
+        else:
+            click.secho(f"You are not allowed", fg="red")
+    else:
+        click.secho(f"You need to be logged", fg="red")
