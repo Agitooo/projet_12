@@ -24,7 +24,7 @@ def get_employees(groupe):
     # TODO : mettre en décorateur le user.token_is_valid() et isinstance
     if isinstance(token, Token):
 
-        is_allowed = user.has_permission(token.user, VIEW + UserEmployee.PERMISSION_USER_NAME)
+        is_allowed = user.has_permission(token.user, VIEW + UserEmployee.PERMISSION_EMPLOYEE_NAME)
 
         if is_allowed:
 
@@ -54,7 +54,7 @@ def get_employees(groupe):
                     )
 
             table = Table(show_header=True)
-            table.add_column("ID Contact")
+            table.add_column("ID Employee")
             table.add_column("Firstname")
             table.add_column("Lastname")
             table.add_column("Email")

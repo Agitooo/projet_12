@@ -1,4 +1,4 @@
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 import os
 import datetime
@@ -10,11 +10,15 @@ from django_token.models import Token
 
 class UserEmployee(AbstractUser):
 
-    PERMISSION_USER_NAME = 'employé'
+    PERMISSION_EMPLOYEE_NAME = 'employé'
 
     EMPLOYEE_COMMERCIAL = 1
     EMPLOYEE_SUPPORT = 2
     EMPLOYEE_GESTION = 3
+
+    EMPLOYEE_GROUPE_SUPPORT = 1
+    EMPLOYEE_GROUPE_COMMERCIAL = 2
+    EMPLOYEE_GROUPE_GESTION = 3
 
     EMPLOYEE_DEPARTMENT = [
         (EMPLOYEE_COMMERCIAL, 'Commercial'),
@@ -35,6 +39,48 @@ class UserEmployee(AbstractUser):
 
     def __str__(self):
         return self.username
+
+    def logout(self, user):
+        try:
+            # Si on a un token on le supprime
+            Token.objects.filter(user=user).delete()
+            self.delete_token_file()
+            return True
+        except Token.DoesNotExist:
+            self.delete_token_file()
+            return True
+
+    def get_group_by_dpt(self, dpt_id):
+        match dpt_id:
+            case self.EMPLOYEE_COMMERCIAL:
+                return self.EMPLOYEE_GROUPE_COMMERCIAL
+            case self.EMPLOYEE_SUPPORT:
+                return self.EMPLOYEE_GROUPE_SUPPORT
+            case self.EMPLOYEE_GESTION:
+                return self.EMPLOYEE_GROUPE_GESTION
+            case _:
+                return None
+
+    def create_user(self, username, password, email, lastname, firstname, phone, dpt_id):
+        try:
+            user = UserEmployee.objects.create_user(username, email, password)
+            user.last_name = lastname
+            user.first_name = firstname
+            user.phone = phone
+            user.department = dpt_id
+
+            # On récupère le groupe qui correspond au département saisi
+            group_id = self.get_group_by_dpt(dpt_id)
+            group = Group.objects.get(id=group_id)
+
+            # Ajout le groupe sur le user
+            user.groups.add(group)
+            user.save()
+
+            return user
+
+        except TypeError:
+            return 'invalid type'
 
     def authenticate_user(self, username, password):
         return authenticate(username=username, password=password)
@@ -82,20 +128,20 @@ class UserEmployee(AbstractUser):
                     token_created = int(round(token.created.timestamp()))
                     now = int(round(datetime.datetime.now().timestamp()))
                     # On regarde qu'il a été créé il y a moins de
-                    # 'UserEmployee.EMPLOYEE_LOGIN_DURATION_VALIDITY' secondes
+                    # 'EMPLOYEE_LOGIN_DURATION_VALIDITY' secondes
                     if token_created <= now <= (token_created + EMPLOYEE_LOGIN_DURATION_VALIDITY):
                         return token
                     else:
                         # Sinon on supprime le token et on doit se logger
                         Token.objects.filter(user=token.user).delete()
                         self.delete_token_file()
-                        return 'invalid'
+                        return False
                 else:
-                    return 'invalid'
+                    return False
             else:
-                return 'invalid'
+                return False
         except Token.DoesNotExist:
-            return 'invalid token'
+            return False
 
     def has_permission(self, user, permission_to_check):
         user_groups = user.groups.all()

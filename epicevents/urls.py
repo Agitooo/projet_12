@@ -16,6 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-]
+import settings.settings
+
+urlpatterns = []
+
+if settings.settings.ADMIN_ENABLED:
+    urlpatterns = [
+        path('admin/', admin.site.urls),
+    ]

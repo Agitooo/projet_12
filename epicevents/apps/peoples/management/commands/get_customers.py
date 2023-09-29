@@ -12,7 +12,6 @@ console = Console()
 
 
 @click.command()
-# @decorators.is_log()
 def get_customers():
     """
         Show all customer
@@ -28,6 +27,7 @@ def get_customers():
         is_allowed = user.has_permission(token.user, VIEW + Customer.PERMISSION_CUSTOMER_NAME)
 
         if is_allowed:
+
             table = Table(show_header=True)
             table.add_column("ID Customer")
             table.add_column("Firstname")
