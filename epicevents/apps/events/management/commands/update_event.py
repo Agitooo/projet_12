@@ -37,6 +37,7 @@ def update_event(event_id, support_id):
                 # Le support saisi, n'est pas dans le département support des employés
                 if support.department != UserEmployee.EMPLOYEE_SUPPORT:
                     click.secho("support_id is not support employee", fg="red")
+                    exit()
 
                 event.support = support
                 event.save()

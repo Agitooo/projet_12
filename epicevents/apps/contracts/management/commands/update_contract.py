@@ -29,53 +29,57 @@ def add_contract(contract_id, status="", remaining_price=""):
         if is_allowed:
 
             if status == "" and remaining_price == "":
-                click.secho("no data to update", fg="red")
+                click.secho("No data to update", fg="red")
                 exit()
 
-            contract = Contract.objects.filter(pk=contract_id).first()
+            # contract = Contract.objects.filter(pk=contract_id).first()
+            try:
+                contract = Contract.objects.get(pk=contract_id)
 
-            # Seul le commercial du client peut modifier le contrat du client ou un gestionnaire
-            if (
-                    contract.client.created_by == token.user
-                    and
-                    token.user.department == UserEmployee.EMPLOYEE_COMMERCIAL
-            ) \
-                    or \
-                    (token.user.department == UserEmployee.EMPLOYEE_GESTION):
-                if status != "":
-                    contract.status = Contract.CONTRACT_SIGNE
-                if remaining_price != "":
-                    contract.remaining_price = remaining_price
-                contract.updated_by = token.user
-                contract.save()
+                # Seul le commercial du client peut modifier le contrat du client ou un gestionnaire
+                if (
+                        contract.client.created_by == token.user
+                        and
+                        token.user.department == UserEmployee.EMPLOYEE_COMMERCIAL
+                ) \
+                        or \
+                        (token.user.department == UserEmployee.EMPLOYEE_GESTION):
+                    if status != "":
+                        contract.status = Contract.CONTRACT_SIGNE
+                    if remaining_price != "":
+                        contract.remaining_price = remaining_price
+                    contract.updated_by = token.user
+                    contract.save()
 
-                if contract:
-                    table = Table(show_header=True)
-                    table.add_column("Customer ID")
-                    table.add_column("Firstname")
-                    table.add_column("Lastname")
-                    table.add_column("Commercial ID")
-                    table.add_column("Firstname")
-                    table.add_column("Lastname")
-                    table.add_column("Contract ID")
-                    table.add_column("Status")
-                    table.add_column("Total price €")
-                    table.add_column("Remaining price €")
-                    table.add_row(
-                        str(contract.client.pk),
-                        contract.client.firstname, contract.client.lastname,
-                        str(contract.contact.pk),
-                        contract.contact.first_name, contract.contact.last_name,
-                        str(contract.pk),
-                        Contract.CONTRACT_STATUS[contract.status - 1][1],
-                        f"{contract.total_price} €", f"{contract.remaining_price} €"
-                    )
-                    console.print(table)
-                    click.secho("Contract updated", fg="green")
+                    if contract:
+                        table = Table(show_header=True)
+                        table.add_column("Customer ID")
+                        table.add_column("Firstname")
+                        table.add_column("Lastname")
+                        table.add_column("Commercial ID")
+                        table.add_column("Firstname")
+                        table.add_column("Lastname")
+                        table.add_column("Contract ID")
+                        table.add_column("Status")
+                        table.add_column("Total price €")
+                        table.add_column("Remaining price €")
+                        table.add_row(
+                            str(contract.client.pk),
+                            contract.client.firstname, contract.client.lastname,
+                            str(contract.contact.pk),
+                            contract.contact.first_name, contract.contact.last_name,
+                            str(contract.pk),
+                            Contract.CONTRACT_STATUS[contract.status - 1][1],
+                            f"{contract.total_price} €", f"{contract.remaining_price} €"
+                        )
+                        console.print(table)
+                        click.secho("Contract updated", fg="green")
+                    else:
+                        click.secho("Contract not found", fg="red")
                 else:
-                    click.secho("Contract not found", fg="red")
-            else:
-                click.secho("Authorization refused", fg="red")
+                    click.secho("Authorization refused", fg="red")
+            except Contract.DoesNotExist:
+                click.secho("Contract not found", fg="red")
         else:
             click.secho(f"You are not allowed", fg="red")
     else:
